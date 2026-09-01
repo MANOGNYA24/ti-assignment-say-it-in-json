@@ -1,0 +1,16 @@
+# Fixture: an 11-node reference chain (10 hops), not present in
+# starter/configs — exercises the max-depth cap distinctly from a real
+# cycle. Resolving k0 pushes k0..k9 onto the stack (depth 10) before
+# reaching k10, so k10's own resolution is the one that trips the cap.
+[chain]
+k0 = $(chain.k1)
+k1 = $(chain.k2)
+k2 = $(chain.k3)
+k3 = $(chain.k4)
+k4 = $(chain.k5)
+k5 = $(chain.k6)
+k6 = $(chain.k7)
+k7 = $(chain.k8)
+k8 = $(chain.k9)
+k9 = $(chain.k10)
+k10 = leaf

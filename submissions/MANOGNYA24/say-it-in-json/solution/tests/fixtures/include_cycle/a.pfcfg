@@ -1,0 +1,5 @@
+# Fixture: genuine include cycle (a -> b -> a), not present in starter/configs.
+@include b.pfcfg
+
+[a]
+value = from-a
