@@ -1,0 +1,191 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pipelineforge.example.invalid/schemas/pfcfg-bundle.schema.json",
+  "title": "pfcfg parse-tree bundle",
+  "description": "Structural mirror of pfcfg/model.py's parse tree, self-contained per entry config. Validates document shape only - last-writer-wins, @include_once dedup, @ifdef/@ifndef truthiness, and interpolation resolution are evaluator behavior over this shape, not something this schema can check statically. See solution/schema/design-note.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["entry", "files"],
+  "properties": {
+    "entry": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Key into `files` for the entry config (mirrors model.MergedConfig.entry / model.ParsedFile.path)."
+    },
+    "files": {
+      "type": "object",
+      "minProperties": 1,
+      "description": "Every file reachable from `entry` via @include/@include_once, keyed by resolved_path.",
+      "additionalProperties": { "$ref": "#/$defs/File" }
+    }
+  },
+  "$defs": {
+    "File": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "nodes"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "nodes": { "type": "array", "items": { "$ref": "#/$defs/Node" } }
+      }
+    },
+
+    "Node": {
+      "oneOf": [
+        { "$ref": "#/$defs/SectionNode" },
+        { "$ref": "#/$defs/AssignNode" },
+        { "$ref": "#/$defs/IncludeNode" },
+        { "$ref": "#/$defs/ConditionalNode" }
+      ]
+    },
+
+    "SectionNode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "path", "line"],
+      "properties": {
+        "type": { "const": "section" },
+        "path": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_]+(\\.[A-Za-z0-9_]+)*$",
+          "description": "Dotted section path (model.SectionHeader.path). Pointer-setting, not a container - does not nest keys."
+        },
+        "line": { "$ref": "#/$defs/Line" }
+      }
+    },
+
+    "AssignNode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "key", "value", "line"],
+      "properties": {
+        "type": { "const": "assign" },
+        "key": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_]+$",
+          "description": "Bare key, joined with the walk's current section pointer at eval time - not a dotted path (model.KeyAssignment.key)."
+        },
+        "value": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Segment" },
+          "description": "Parsed via interpolate.py's _ValueParser, unresolved. Empty array = empty string value. Always an array, even for values with zero interpolation - no bare-string shortcut, no comma-list splitting."
+        },
+        "line": { "$ref": "#/$defs/Line" }
+      }
+    },
+
+    "IncludeNode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "target", "once", "resolved_path", "line"],
+      "properties": {
+        "type": { "const": "include" },
+        "target": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Literal directive path text, relative to its file (model.Include.target). Unresolved, kept for round-trip display."
+        },
+        "once": {
+          "type": "boolean",
+          "description": "true for @include_once, false for @include. Whether it actually dedups is walk-scoped evaluator state (a seen-set shared across the whole bundle), not something this flag alone determines."
+        },
+        "resolved_path": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Static join-and-normalize of target against its containing file's directory, computed once at conversion time (same as walker.py's os.path.realpath(os.path.join(base_dir, target))). Key into `files`."
+        },
+        "line": { "$ref": "#/$defs/Line" }
+      }
+    },
+
+    "ConditionalNode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "kind", "var", "body", "line"],
+      "properties": {
+        "type": { "const": "conditional" },
+        "kind": { "enum": ["ifdef", "ifndef"] },
+        "var": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Guard variable name, looked up against the evaluation environment (never resolved here)."
+        },
+        "body": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Node" },
+          "description": "Gated nodes, in source order. May contain Section/Assign/Include/Conditional nodes, including further nesting - no type-level restriction on what a conditional can gate."
+        },
+        "line": { "$ref": "#/$defs/Line" }
+      }
+    },
+
+    "Segment": {
+      "oneOf": [
+        { "$ref": "#/$defs/LiteralSegment" },
+        { "$ref": "#/$defs/EnvSegment" },
+        { "$ref": "#/$defs/KeySegment" }
+      ]
+    },
+
+    "LiteralSegment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "text"],
+      "properties": {
+        "type": { "const": "literal" },
+        "text": { "type": "string" }
+      }
+    },
+
+    "EnvSegment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "var", "mode"],
+      "properties": {
+        "type": { "const": "env" },
+        "var": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[^}:]+$",
+          "description": "${VAR...}. Cannot contain '}' or ':' - the parser's var-name scan stops at the first occurrence of either, so this is a structural fact, not an invented restriction."
+        },
+        "mode": { "enum": ["plain", "default", "alt"] },
+        "expr": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Segment" },
+          "description": "The :- (default) or :+ (alt) sub-expression, itself a segment sequence (recursive - handles nested ${...}/$(...)). Absent iff mode is \"plain\"."
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "mode": { "const": "plain" } } },
+          "then": { "not": { "required": ["expr"] } }
+        },
+        {
+          "if": { "properties": { "mode": { "enum": ["default", "alt"] } } },
+          "then": { "required": ["expr"] }
+        }
+      ]
+    },
+
+    "KeySegment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "path"],
+      "properties": {
+        "type": { "const": "key" },
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "description": "$(section.key) target. Not pattern-restricted to dotted identifiers - the reference parser (_parse_key_ref) accepts any text up to the closing ')' with no charset check, so this schema doesn't invent one either."
+        }
+      }
+    },
+
+    "Line": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "1-indexed source line (model.SourceLoc.line), for diagnostics parity with the reference evaluator."
+    }
+  }
+}
