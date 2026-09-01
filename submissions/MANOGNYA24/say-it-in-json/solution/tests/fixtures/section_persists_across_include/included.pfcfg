@@ -1,0 +1,6 @@
+# Fixture half 2/2: ends on a bare section header with no key beneath it
+# in THIS file. See entry.pfcfg for what this proves.
+[shared]
+seeded = value
+
+[x]

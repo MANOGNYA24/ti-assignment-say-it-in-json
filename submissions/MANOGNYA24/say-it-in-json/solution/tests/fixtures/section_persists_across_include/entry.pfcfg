@@ -1,0 +1,17 @@
+# Fixture: current_section is one pointer for the WHOLE walk, never reset
+# on entering/leaving an included file (walker.py's own _walk_nodes
+# comment calls this out; unexercised anywhere in starter/configs). This
+# is a case a reimplementation would "correct" by accident if it scoped
+# current_section per file, e.g. as a stack pushed/popped around
+# _enter_file.
+#
+# @include must appear before any section header in the file it's written
+# in (parser.py's own rule) — so this file never sets a section of its
+# own at all. included.pfcfg ends on a bare [x] section header with
+# nothing under it in that file. The very next node here, after the
+# include returns, is a bare assignment with no section header anywhere
+# in THIS file — it must land under [x] (included.pfcfg's last section),
+# not raise "no section ever set".
+@include included.pfcfg
+
+after = also-lands-under-x
