@@ -1,0 +1,868 @@
+{
+  "entry": "/Users/manognya/Desktop/ti-assignment-say-it-in-json/starter/configs/edge-cases/conditional-includes.pfcfg",
+  "files": {
+    "/Users/manognya/Desktop/ti-assignment-say-it-in-json/starter/configs/edge-cases/conditional-includes.pfcfg": {
+      "path": "/Users/manognya/Desktop/ti-assignment-say-it-in-json/starter/configs/edge-cases/conditional-includes.pfcfg",
+      "nodes": [
+        {
+          "type": "conditional",
+          "kind": "ifdef",
+          "var": "FEATURE_BETA",
+          "body": [
+            {
+              "type": "include",
+              "target": "../templates/node-build.pfcfg",
+              "once": false,
+              "resolved_path": "/Users/manognya/Desktop/ti-assignment-say-it-in-json/starter/configs/templates/node-build.pfcfg",
+              "line": 4
+            }
+          ],
+          "line": 3
+        },
+        {
+          "type": "conditional",
+          "kind": "ifndef",
+          "var": "FEATURE_BETA",
+          "body": [
+            {
+              "type": "include",
+              "target": "../_base/defaults.pfcfg",
+              "once": false,
+              "resolved_path": "/Users/manognya/Desktop/ti-assignment-say-it-in-json/starter/configs/_base/defaults.pfcfg",
+              "line": 8
+            },
+            {
+              "type": "section",
+              "path": "build",
+              "line": 9
+            },
+            {
+              "type": "assign",
+              "key": "steps",
+              "value": [
+                {
+                  "type": "literal",
+                  "text": "legacy-compile,legacy-test"
+                }
+              ],
+              "line": 10
+            }
+          ],
+          "line": 7
+        },
+        {
+          "type": "section",
+          "path": "feature",
+          "line": 13
+        },
+        {
+          "type": "assign",
+          "key": "beta_enabled",
+          "value": [
+            {
+              "type": "literal",
+              "text": "false"
+            }
+          ],
+          "line": 14
+        },
+        {
+          "type": "conditional",
+          "kind": "ifdef",
+          "var": "FEATURE_BETA",
+          "body": [
+            {
+              "type": "section",
+              "path": "feature",
+              "line": 17
+            },
+            {
+              "type": "assign",
+              "key": "beta_enabled",
+              "value": [
+                {
+                  "type": "literal",
+                  "text": "true"
+                }
+              ],
+              "line": 18
+            }
+          ],
+          "line": 16
+        },
+        {
+          "type": "section",
+          "path": "migration",
+          "line": 21
+        },
+        {
+          "type": "assign",
+          "key": "api_endpoint",
+          "value": [
+            {
+              "type": "env",
+              "var": "REQUIRED_API_ENDPOINT",
+              "mode": "plain"
+            }
+          ],
+          "line": 23
+        },
+        {
+          "type": "assign",
+          "key": "fallback_endpoint",
+          "value": [
+            {
+              "type": "env",
+              "var": "OPTIONAL_API_ENDPOINT",
+              "mode": "default",
+              "expr": [
+                {
+                  "type": "key",
+                  "path": "migration.api_endpoint"
+                }
+              ]
+            }
+          ],
+          "line": 25
+        },
+        {
+          "type": "conditional",
+          "kind": "ifdef",
+          "var": "MIGRATION_AUDIT",
+          "body": [
+            {
+              "type": "section",
+              "path": "audit",
+              "line": 28
+            },
+            {
+              "type": "assign",
+              "key": "requested_by",
+              "value": [
+                {
+                  "type": "env",
+                  "var": "MIGRATION_AUDIT_USER",
+                  "mode": "default",
+                  "expr": [
+                    {
+                      "type": "literal",
+                      "text": "unknown"
+                    }
+                  ]
+                }
+              ],
+              "line": 29
+            },
+            {
+              "type": "assign",
+              "key": "ticket",
+              "value": [
+                {
+                  "type": "env",
+                  "var": "MIGRATION_AUDIT_TICKET",
+                  "mode": "plain"
+                }
+              ],
+              "line": 30
+            }
+          ],
+          "line": 27
+        }
+      ]
+    },
+    "/Users/manognya/Desktop/ti-assignment-say-it-in-json/starter/configs/templates/node-build.pfcfg": {
+      "path": "/Users/manognya/Desktop/ti-assignment-say-it-in-json/starter/configs/templates/node-build.pfcfg",
+      "nodes": [
+        {
+          "type": "include",
+          "target": "../_base/defaults.pfcfg",
+          "once": false,
+          "resolved_path": "/Users/manognya/Desktop/ti-assignment-say-it-in-json/starter/configs/_base/defaults.pfcfg",
+          "line": 3
+        },
+        {
+          "type": "section",
+          "path": "template",
+          "line": 5
+        },
+        {
+          "type": "assign",
+          "key": "name",
+          "value": [
+            {
+              "type": "literal",
+              "text": "node-build"
+            }
+          ],
+          "line": 6
+        },
+        {
+          "type": "assign",
+          "key": "language",
+          "value": [
+            {
+              "type": "literal",
+              "text": "node"
+            }
+          ],
+          "line": 7
+        },
+        {
+          "type": "section",
+          "path": "build",
+          "line": 9
+        },
+        {
+          "type": "assign",
+          "key": "steps",
+          "value": [
+            {
+              "type": "literal",
+              "text": "install,lint,test,build"
+            }
+          ],
+          "line": 10
+        },
+        {
+          "type": "assign",
+          "key": "install_cmd",
+          "value": [
+            {
+              "type": "key",
+              "path": "toolchain.node.install_cmd"
+            }
+          ],
+          "line": 11
+        },
+        {
+          "type": "assign",
+          "key": "node_version",
+          "value": [
+            {
+              "type": "key",
+              "path": "toolchain.node.version"
+            }
+          ],
+          "line": 12
+        },
+        {
+          "type": "section",
+          "path": "build.env",
+          "line": 14
+        },
+        {
+          "type": "assign",
+          "key": "NODE_ENV",
+          "value": [
+            {
+              "type": "env",
+              "var": "NODE_ENV",
+              "mode": "default",
+              "expr": [
+                {
+                  "type": "literal",
+                  "text": "test"
+                }
+              ]
+            }
+          ],
+          "line": 15
+        },
+        {
+          "type": "assign",
+          "key": "CI",
+          "value": [
+            {
+              "type": "env",
+              "var": "CI",
+              "mode": "default",
+              "expr": [
+                {
+                  "type": "literal",
+                  "text": "false"
+                }
+              ]
+            }
+          ],
+          "line": 16
+        },
+        {
+          "type": "section",
+          "path": "test",
+          "line": 18
+        },
+        {
+          "type": "assign",
+          "key": "runner",
+          "value": [
+            {
+              "type": "env",
+              "var": "TEST_RUNNER",
+              "mode": "default",
+              "expr": [
+                {
+                  "type": "literal",
+                  "text": "jest"
+                }
+              ]
+            }
+          ],
+          "line": 19
+        },
+        {
+          "type": "assign",
+          "key": "coverage_threshold",
+          "value": [
+            {
+              "type": "env",
+              "var": "COVERAGE_MIN",
+              "mode": "default",
+              "expr": [
+                {
+                  "type": "literal",
+                  "text": "80"
+                }
+              ]
+            }
+          ],
+          "line": 20
+        },
+        {
+          "type": "section",
+          "path": "lint",
+          "line": 22
+        },
+        {
+          "type": "assign",
+          "key": "tool",
+          "value": [
+            {
+              "type": "literal",
+              "text": "eslint"
+            }
+          ],
+          "line": 23
+        },
+        {
+          "type": "assign",
+          "key": "fail_on_warning",
+          "value": [
+            {
+              "type": "env",
+              "var": "LINT_STRICT",
+              "mode": "default",
+              "expr": [
+                {
+                  "type": "literal",
+                  "text": "false"
+                }
+              ]
+            }
+          ],
+          "line": 24
+        }
+      ]
+    },
+    "/Users/manognya/Desktop/ti-assignment-say-it-in-json/starter/configs/_base/defaults.pfcfg": {
+      "path": "/Users/manognya/Desktop/ti-assignment-say-it-in-json/starter/configs/_base/defaults.pfcfg",
+      "nodes": [
+        {
+          "type": "include",
+          "target": "toolchains.pfcfg",
+          "once": true,
+          "resolved_path": "/Users/manognya/Desktop/ti-assignment-say-it-in-json/starter/configs/_base/toolchains.pfcfg",
+          "line": 2
+        },
+        {
+          "type": "include",
+          "target": "notifications.pfcfg",
+          "once": true,
+          "resolved_path": "/Users/manognya/Desktop/ti-assignment-say-it-in-json/starter/configs/_base/notifications.pfcfg",
+          "line": 3
+        },
+        {
+          "type": "section",
+          "path": "meta",
+          "line": 5
+        },
+        {
+          "type": "assign",
+          "key": "format_version",
+          "value": [
+            {
+              "type": "literal",
+              "text": "3"
+            }
+          ],
+          "line": 6
+        },
+        {
+          "type": "assign",
+          "key": "platform",
+          "value": [
+            {
+              "type": "literal",
+              "text": "pipelineforge"
+            }
+          ],
+          "line": 7
+        },
+        {
+          "type": "section",
+          "path": "build",
+          "line": 9
+        },
+        {
+          "type": "assign",
+          "key": "timeout_minutes",
+          "value": [
+            {
+              "type": "literal",
+              "text": "45"
+            }
+          ],
+          "line": 10
+        },
+        {
+          "type": "assign",
+          "key": "retry_count",
+          "value": [
+            {
+              "type": "literal",
+              "text": "1"
+            }
+          ],
+          "line": 11
+        },
+        {
+          "type": "assign",
+          "key": "image",
+          "value": [
+            {
+              "type": "env",
+              "var": "PF_BUILD_IMAGE",
+              "mode": "default",
+              "expr": [
+                {
+                  "type": "literal",
+                  "text": "pfci/builder:22.04"
+                }
+              ]
+            }
+          ],
+          "line": 12
+        },
+        {
+          "type": "assign",
+          "key": "parallel",
+          "value": [
+            {
+              "type": "literal",
+              "text": "false"
+            }
+          ],
+          "line": 13
+        },
+        {
+          "type": "section",
+          "path": "cache",
+          "line": 15
+        },
+        {
+          "type": "assign",
+          "key": "enabled",
+          "value": [
+            {
+              "type": "literal",
+              "text": "true"
+            }
+          ],
+          "line": 16
+        },
+        {
+          "type": "assign",
+          "key": "key_prefix",
+          "value": [
+            {
+              "type": "env",
+              "var": "CI",
+              "mode": "alt",
+              "expr": [
+                {
+                  "type": "literal",
+                  "text": "ci-"
+                }
+              ]
+            },
+            {
+              "type": "env",
+              "var": "CACHE_NAMESPACE",
+              "mode": "default",
+              "expr": [
+                {
+                  "type": "literal",
+                  "text": "default"
+                }
+              ]
+            }
+          ],
+          "line": 17
+        },
+        {
+          "type": "section",
+          "path": "artifacts",
+          "line": 19
+        },
+        {
+          "type": "assign",
+          "key": "retention_days",
+          "value": [
+            {
+              "type": "literal",
+              "text": "14"
+            }
+          ],
+          "line": 20
+        },
+        {
+          "type": "assign",
+          "key": "compress",
+          "value": [
+            {
+              "type": "literal",
+              "text": "true"
+            }
+          ],
+          "line": 21
+        }
+      ]
+    },
+    "/Users/manognya/Desktop/ti-assignment-say-it-in-json/starter/configs/_base/toolchains.pfcfg": {
+      "path": "/Users/manognya/Desktop/ti-assignment-say-it-in-json/starter/configs/_base/toolchains.pfcfg",
+      "nodes": [
+        {
+          "type": "section",
+          "path": "toolchain.node",
+          "line": 3
+        },
+        {
+          "type": "assign",
+          "key": "version",
+          "value": [
+            {
+              "type": "env",
+              "var": "NODE_VERSION",
+              "mode": "default",
+              "expr": [
+                {
+                  "type": "literal",
+                  "text": "20"
+                }
+              ]
+            }
+          ],
+          "line": 4
+        },
+        {
+          "type": "assign",
+          "key": "binary",
+          "value": [
+            {
+              "type": "literal",
+              "text": "node"
+            }
+          ],
+          "line": 5
+        },
+        {
+          "type": "assign",
+          "key": "package_manager",
+          "value": [
+            {
+              "type": "env",
+              "var": "PKG_MGR",
+              "mode": "default",
+              "expr": [
+                {
+                  "type": "literal",
+                  "text": "npm"
+                }
+              ]
+            }
+          ],
+          "line": 6
+        },
+        {
+          "type": "assign",
+          "key": "install_cmd",
+          "value": [
+            {
+              "type": "env",
+              "var": "PKG_MGR",
+              "mode": "default",
+              "expr": [
+                {
+                  "type": "literal",
+                  "text": "npm"
+                }
+              ]
+            },
+            {
+              "type": "literal",
+              "text": " ci"
+            }
+          ],
+          "line": 7
+        },
+        {
+          "type": "section",
+          "path": "toolchain.go",
+          "line": 9
+        },
+        {
+          "type": "assign",
+          "key": "version",
+          "value": [
+            {
+              "type": "env",
+              "var": "GO_VERSION",
+              "mode": "default",
+              "expr": [
+                {
+                  "type": "literal",
+                  "text": "1.22"
+                }
+              ]
+            }
+          ],
+          "line": 10
+        },
+        {
+          "type": "assign",
+          "key": "module_mode",
+          "value": [
+            {
+              "type": "literal",
+              "text": "on"
+            }
+          ],
+          "line": 11
+        },
+        {
+          "type": "section",
+          "path": "toolchain.rust",
+          "line": 13
+        },
+        {
+          "type": "assign",
+          "key": "version",
+          "value": [
+            {
+              "type": "env",
+              "var": "RUST_VERSION",
+              "mode": "default",
+              "expr": [
+                {
+                  "type": "literal",
+                  "text": "stable"
+                }
+              ]
+            }
+          ],
+          "line": 14
+        },
+        {
+          "type": "assign",
+          "key": "target",
+          "value": [
+            {
+              "type": "env",
+              "var": "RUST_TARGET",
+              "mode": "default",
+              "expr": [
+                {
+                  "type": "literal",
+                  "text": "x86_64-unknown-linux-gnu"
+                }
+              ]
+            }
+          ],
+          "line": 15
+        },
+        {
+          "type": "section",
+          "path": "toolchain.default",
+          "line": 17
+        },
+        {
+          "type": "assign",
+          "key": "name",
+          "value": [
+            {
+              "type": "literal",
+              "text": "node"
+            }
+          ],
+          "line": 18
+        },
+        {
+          "type": "assign",
+          "key": "compiler",
+          "value": [
+            {
+              "type": "key",
+              "path": "toolchain.node.binary"
+            }
+          ],
+          "line": 19
+        }
+      ]
+    },
+    "/Users/manognya/Desktop/ti-assignment-say-it-in-json/starter/configs/_base/notifications.pfcfg": {
+      "path": "/Users/manognya/Desktop/ti-assignment-say-it-in-json/starter/configs/_base/notifications.pfcfg",
+      "nodes": [
+        {
+          "type": "section",
+          "path": "notify",
+          "line": 3
+        },
+        {
+          "type": "assign",
+          "key": "on_success",
+          "value": [
+            {
+              "type": "env",
+              "var": "NOTIFY_SUCCESS",
+              "mode": "default",
+              "expr": [
+                {
+                  "type": "literal",
+                  "text": "log"
+                }
+              ]
+            }
+          ],
+          "line": 4
+        },
+        {
+          "type": "assign",
+          "key": "on_failure",
+          "value": [
+            {
+              "type": "env",
+              "var": "NOTIFY_FAILURE",
+              "mode": "default",
+              "expr": [
+                {
+                  "type": "literal",
+                  "text": "email"
+                }
+              ]
+            }
+          ],
+          "line": 5
+        },
+        {
+          "type": "section",
+          "path": "notify.email",
+          "line": 7
+        },
+        {
+          "type": "assign",
+          "key": "recipients",
+          "value": [
+            {
+              "type": "env",
+              "var": "BUILD_NOTIFY_LIST",
+              "mode": "default",
+              "expr": [
+                {
+                  "type": "literal",
+                  "text": "ops@example.invalid"
+                }
+              ]
+            }
+          ],
+          "line": 8
+        },
+        {
+          "type": "assign",
+          "key": "from",
+          "value": [
+            {
+              "type": "literal",
+              "text": "pipelineforge-noreply@example.invalid"
+            }
+          ],
+          "line": 9
+        },
+        {
+          "type": "section",
+          "path": "notify.slack",
+          "line": 11
+        },
+        {
+          "type": "conditional",
+          "kind": "ifdef",
+          "var": "SLACK_WEBHOOK",
+          "body": [
+            {
+              "type": "assign",
+              "key": "enabled",
+              "value": [
+                {
+                  "type": "literal",
+                  "text": "true"
+                }
+              ],
+              "line": 13
+            },
+            {
+              "type": "assign",
+              "key": "channel",
+              "value": [
+                {
+                  "type": "env",
+                  "var": "SLACK_CHANNEL",
+                  "mode": "default",
+                  "expr": [
+                    {
+                      "type": "literal",
+                      "text": "#builds"
+                    }
+                  ]
+                }
+              ],
+              "line": 14
+            }
+          ],
+          "line": 12
+        },
+        {
+          "type": "conditional",
+          "kind": "ifndef",
+          "var": "SLACK_WEBHOOK",
+          "body": [
+            {
+              "type": "section",
+              "path": "notify.slack",
+              "line": 18
+            },
+            {
+              "type": "assign",
+              "key": "enabled",
+              "value": [
+                {
+                  "type": "literal",
+                  "text": "false"
+                }
+              ],
+              "line": 19
+            }
+          ],
+          "line": 17
+        }
+      ]
+    }
+  }
+}
